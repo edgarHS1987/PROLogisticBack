@@ -25,6 +25,14 @@ return new class extends Migration
             $table->foreign('clients_id')->references('id')->on('clients')->onDelete('cascade');
             $table->foreign('warehouses_id')->references('id')->on('warehouses')->onDelete('cascade');
         });
+
+        Schema::create('clients_users', function(Blueprint $table){
+            $table->bigInteger('clients_id')->unsigned()->index();
+            $table->bigInteger('users_id')->unsigned()->index();
+
+            $table->foreign('clients_id')->references('id')->on('clients')->onDelete('cascade');
+            $table->foreign('users_id')->references('id')->on('users')->onDelete('cascade');
+        });
     }
 
     /**
@@ -32,6 +40,7 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::dropIfExists('clients_users');
         Schema::dropIfExists('clients_warehouses');
         Schema::dropIfExists('clients');
     }

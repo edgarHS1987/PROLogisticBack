@@ -105,6 +105,8 @@ Route::group(['middleware'=>'auth:api'], function(){
     Route::get('zones/byClient/{id}', [ZonesController::class, 'byClient']);
     Route::post('zones/verify', [ZonesController::class, 'verifyIfExist']);
     Route::post('zones/configuring', [ZonesController::class, 'configuring']);
+    Route::get('zones/unsignedDrivers/{id}', [ZonesController::class, 'unsignedDriver']);
+    Route::post('zones/assign/driver', [ZonesController::class, 'assignDriver']);
 
     Route::get('warehouses/show/{id}', [WarehousesController::class, 'show']);
 
