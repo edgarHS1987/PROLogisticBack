@@ -52,6 +52,8 @@ Route::group(['middleware'=>'auth:api'], function(){
     Route::post('drivers/create', [DriversController::class, 'store']);
     Route::get('drivers', [DriversController::class, 'index']);
     Route::get('drivers/{id}', [DriversController::class, 'edit']);
+    Route::get('drivers/availableDays/{id}', [DriversController::class, 'availableDays']);
+    Route::post('drivers/availableDays', [DriversController::class, 'availableDaysStore']);
 
     Route::get('drivers/address/{id}', [DriversAddressController::class, 'edit']);
     Route::post('drivers/address/create', [DriversAddressController::class, 'store']);

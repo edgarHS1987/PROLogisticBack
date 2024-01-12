@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 use App\Models\Driver;
 use App\Models\User;
+use App\Models\DriversSchedule;
+
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -15,26 +17,18 @@ class DriversController extends Controller
      */
     public function index()
     {   
-        // try{
-        //     \DB::beginTransaction();
+        $allDrivers = Driver::select('id', 'names', 'lastname1', 'lastname2', 'rfc', 'photo', 'status')->get();
 
+        $today = date('Y-m-d');
+        foreach($allDrivers as $driver){
+        
+            $availableDays = DriversSchedule::where('drivers_id', $driver->id)
+                                    ->where('date', '>', $today)
+                                    ->select('id')->get();
 
+            $driver['availableDays'] = count($availableDays);
+        }
 
-        //     \DB::commit();
-
-        //     return response()->json([
-        //         'ok' => 'registro correcto',                
-        //         'sales_id' => $sales->id
-        //     ]);
-
-
-        // }catch(\Exception $e){
-        //     \DB::rollback();
-        //     //dd($e);
-        //     return response()->json(['error'=>'ERROR ('.$e->getCode().'): '.$e->getMessage().' '.$e->getLine()]);
-        // }
-
-        $allDrivers = Driver::all();
         try {
             $statusCode = 200;
             return response()->json([
@@ -158,14 +152,6 @@ class DriversController extends Controller
 
 
     /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-
-    }
-
-    /**
      * Update the specified resource in storage.
      */
     public function update(Request $request, string $id)
@@ -200,13 +186,47 @@ class DriversController extends Controller
         Driver::where('id', $id)->update(['rfc' => $RFC]);
     }
 
+    /**
+     * Obtiene el numero de dias disponibles de un driver
+     */
+    public function availableDays($id){
+        $today = date('Y-m-d');
+        $driver = Driver::where('users_id', $id)->first();
 
+        $days =  DriversSchedule::where('drivers_id', $driver->id)
+                        ->where('date', '>=', $today)->count();
+        
+        return response()->json($days);
+    }
 
     /**
-     * Remove the specified resource from storage.
+     * Guarda los dias disponibles
      */
-    public function destroy(string $id)
-    {
-        //
+    public function availableDaysStore(Request $request){
+        try{
+            \DB::beginTransaction();
+
+            $driver = Driver::where('users_id', $request->users_id)->select('id')->first();
+
+            $dates = $request->dates;
+
+            foreach($dates as $date){
+                $schedule = new DriversSchedule();
+                $schedule->drivers_id = $driver->id;
+                $schedule->date = $date;
+                //$schedule->save();
+            }
+
+            \DB::commit();
+
+            return response()->json([
+                'message'=>'Se registro la disponibilidad correctamente'
+            ]);
+        }catch(Exception $e){
+            return response()->json([
+                'error'=>'ERROR ('.$e->getCode().'): '.$e->getMessage(),
+                'message'=>'Error al registrar disponibilidad'
+            ]);
+        }
     }
 }
