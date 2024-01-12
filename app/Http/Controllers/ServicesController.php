@@ -30,7 +30,7 @@ class ServicesController extends Controller
         }
     }
 
-    public function list(Request $request){
+    public function unsignedByClient(Request $request){
         $services = Services::where('clients_id', $request->clients_id)
                             ->where('assigned', false)
                             ->get();
@@ -44,6 +44,13 @@ class ServicesController extends Controller
         }
 
         return response()->json($services);
+    }
+
+
+    public function totalUnsignedByClient($id){
+        $services = Services::where('clients_id', $id)->get();
+
+        return response()->json(count($services));
     }
 
     public function store(Request $request){
@@ -93,6 +100,4 @@ class ServicesController extends Controller
             return response()->json(['error'=>'ERROR ('.$e->getCode().'): '.$e->getMessage().' '.$e->getLine()]);
         }
     }
-
-
 }

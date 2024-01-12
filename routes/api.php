@@ -75,7 +75,8 @@ Route::group(['middleware'=>'auth:api'], function(){
 
     Route::get('warehouses/show/{id}', [WarehousesController::class, 'show']);
 
-    Route::post('services/list', [ServicesController::class, 'list']);
+    Route::post('services/unsigned', [ServicesController::class, 'unsignedByClient']);
+    Route::get('services/unsigned/{id}', [ServicesController::class, 'totalUnsignedByClient']);
     Route::post('services', [ServicesController::class, 'store']);
     Route::delete('services/{id}', [ServicesController::class, 'delete']);
 });
