@@ -214,7 +214,7 @@ class DriversController extends Controller
                 $schedule = new DriversSchedule();
                 $schedule->drivers_id = $driver->id;
                 $schedule->date = $date;
-                //$schedule->save();
+                $schedule->save();
             }
 
             \DB::commit();
