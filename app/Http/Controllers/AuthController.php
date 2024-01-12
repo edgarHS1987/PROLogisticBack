@@ -10,6 +10,7 @@ use App\Models\User;
 class AuthController extends Controller
 {
     public function login(Request $request){
+
         $request->validate([
             'email'     => 'required|string|email',
             'password'  => 'required|string'
@@ -18,10 +19,10 @@ class AuthController extends Controller
         $credentials = request(['email', 'password']);
 
         if(!\Auth::attempt($credentials)){
-            return response()->json([
-                'error'     => 'Unauthorized',
-                'message'   => 'Usuario y/o contraseña incorrecto'
-            ], 401);
+             return response()->json([
+                 'error'     => 'Unauthorized',
+                 'message'   => 'Usuario y/o contraseña incorrecto'
+             ], 401);
         }
 
         $user = $request->user();

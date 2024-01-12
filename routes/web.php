@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\DriversDocumentsImagesController;
 
 /*
 |--------------------------------------------------------------------------
@@ -16,3 +17,11 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+
+// Route::group(['middleware' => ['cors']], function () {
+    // Route::get('url', [DriversDocumentsImagesController::class, 'getDoc']);
+    // Route::get('download', [DriversDocumentsImagesController::class, 'download'])->name('download');
+
+// });
+
+

@@ -13,7 +13,7 @@ return [
     |
     */
 
-    'default' => env('FILESYSTEM_DISK', 'local'),
+    'default' => env('FILESYSTEM_DISK', 'docsDrivers'),
 
     /*
     |--------------------------------------------------------------------------
@@ -44,6 +44,14 @@ return [
             'throw' => false,
         ],
 
+        'docsDrivers' => [
+            'driver' => 'local',
+            'root' => storage_path('app/drivers-doc'),
+            //'url' => env('APP_URL').'/documents-drivers',
+            'visibility' => 'public',
+            'throw' => false,
+        ],
+
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),
@@ -70,7 +78,7 @@ return [
     */
 
     'links' => [
-        public_path('storage') => storage_path('app/public'),
+        public_path('storage/drivers-doc') => storage_path('drivers-doc'),
     ],
 
 ];

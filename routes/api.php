@@ -7,6 +7,12 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 
 use App\Http\Controllers\PermissionsController;
+use App\Http\Controllers\DriversController;
+use App\Http\Controllers\DriversAddressController;
+use App\Http\Controllers\DriversDocumentsController;
+use App\Http\Controllers\DriversDocumentsImagesController;
+use App\Http\Controllers\DriversVehiclesController;
+
 use App\Http\Controllers\RolesController;
 use App\Http\Controllers\UsersController;
 
@@ -42,6 +48,31 @@ Route::group(['middleware'=>'auth:api'], function(){
     Route::get('permissions/assigned/{id}', [PermissionsController::class, 'permissionsAssignedToRole']);
     Route::post('permissions/assign', [PermissionsController::class, 'assign']);
     Route::post('permissions/design', [PermissionsController::class, 'design']);
+    
+    Route::post('drivers/create', [DriversController::class, 'store']);
+    Route::get('drivers', [DriversController::class, 'index']);
+    Route::get('drivers/{id}', [DriversController::class, 'edit']);
+
+    Route::get('drivers/address/{id}', [DriversAddressController::class, 'edit']);
+    Route::post('drivers/address/create', [DriversAddressController::class, 'store']);
+    //Route::put('drivers/address/{id}', [DriversAddressController::class, 'edit']);
+
+    Route::post('drivers/docs/uploadDoc/', [DriversDocumentsController::class, 'subir']);
+    Route::post('drivers/docs/clearFolder', [DriversDocumentsController::class, 'deleteFolder']);
+    Route::post('drivers/docs/create', [DriversDocumentsController::class, 'store']);
+    //Route::post('drivers/docs/update{id}', [DriversDocumentsController::class, 'update']);
+    Route::get('drivers/docs/{id}', [DriversDocumentsController::class, 'edit']);
+
+    Route::get('drivImages/listaDocuments/{tipo}/{id}', [DriversDocumentsImagesController::class, 'listDocuments']);
+    Route::get('drivImages/oneDocument/{file}/{tipo}/{id}', [DriversDocumentsImagesController::class, 'getDoc']);
+    Route::get('drivImages/allDocs/{tipo}/{id}', [DriversDocumentsImagesController::class, 'listDocsVisor']);
+    Route::get('drivImages/visorDoc/{file}/{tipo}/{id}', [DriversDocumentsImagesController::class, 'getDocumentVisor']);
+
+    Route::post('drivers/vehicle/create', [DriversVehiclesController::class, 'store']);
+    Route::get('drivers/vehicle/all', [DriversVehiclesController::class, 'index']);
+    Route::get('drivers/vehicle/{id}', [DriversVehiclesController::class, 'edit']);
+    Route::post('drivers/vehicle/update', [DriversVehiclesController::class, 'update']);
+
 
     Route::get('roles', [RolesController::class, 'index']);
     Route::get('roles/{id}', [RolesController::class, 'edit']);
