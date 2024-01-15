@@ -11,6 +11,7 @@ use App\Models\ZipCodes;
 use App\Models\ZonesDrivers;
 use App\Models\ServicesDrivers;
 use App\Models\DriverAddress;
+use App\Models\Driver;
 
 class ServicesController extends Controller
 {
@@ -154,6 +155,23 @@ class ServicesController extends Controller
         return response()->json($services);
     }
 
+    /**
+     * Servicios asignados a driver
+     */
+    public function assigned(Request $request){
+        $users_id = $request->user()->id;
+        $driver = Driver::where('users_id', $users_id)->select('id')->first();
+        
+        $services = Services::join('services_drivers', 'services_drivers.services_id', 'services.id')                            
+                            ->where('services_drivers.drivers_id', $driver->id)
+                            ->select(
+                                'services.id', 'services.contact_name', 'services.address', 'services.colony',
+                                'services.zip_code', 'services.phones', 'services.municipality'
+                            )
+                            ->get();
+
+        return response()->json($services);
+    }
 
     public function totalUnsignedByClient($id){
         $services = Services::where('clients_id', $id)->where('assigned', false)->get();

@@ -196,7 +196,7 @@ class DriversController extends Controller
     /**
      * Obtiene el numero de dias disponibles de un driver
      */
-    public function availableDays(){
+    public function availableDays(Request $request){        
         $user = $request->user()->id;
         $today = date('Y-m-d');
         $driver = Driver::where('users_id', $user)->first();
@@ -204,7 +204,9 @@ class DriversController extends Controller
         $days =  DriversSchedule::where('drivers_id', $driver->id)
                         ->where('date', '>=', $today)->count();
         
-        return response()->json($days);
+        return response()->json([
+            'days'=>$days
+        ]);
     }
 
     /**
