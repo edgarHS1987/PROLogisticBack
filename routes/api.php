@@ -114,6 +114,6 @@ Route::group(['middleware'=>'auth:api'], function(){
     Route::post('services/unsigned', [ServicesController::class, 'unsignedByClient']);
     Route::get('services/unsigned/{id}', [ServicesController::class, 'totalUnsignedByClient']);
     Route::post('services', [ServicesController::class, 'store']);
-    Route::delete('services/{id}', [ServicesController::class, 'delete']);
+    Route::delete('services/delete/{id}', [ServicesController::class, 'delete']);
     Route::post('services/assign', [ServicesController::class, 'assignToDriver']);
 });
