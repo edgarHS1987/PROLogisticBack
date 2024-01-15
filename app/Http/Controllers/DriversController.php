@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use App\Models\Driver;
 use App\Models\User;
 use App\Models\DriversSchedule;
+use App\Models\Zones;
 
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -32,6 +33,17 @@ class DriversController extends Controller
             $availableDays = DriversSchedule::where('drivers_id', $driver->id)
                                     ->where('date', $operator, $today)
                                     ->select('id')->get();
+            
+            $zone = Zones::join('zones_drivers', 'zones_drivers.zones_id', 'zones.id')
+                        ->where('zones_drivers.drivers_id', $driver->id)
+                        ->select('zones.name')
+                        ->first();
+
+            if(isset($zone)){
+                $driver['zone'] = $zone->name;
+            }else{
+                $driver['zone'] = 'Si zona';
+            }
 
             $driver['availableDays'] = count($availableDays);
         }
