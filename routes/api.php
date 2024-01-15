@@ -52,7 +52,7 @@ Route::group(['middleware'=>'auth:api'], function(){
     Route::post('drivers/create', [DriversController::class, 'store']);
     Route::get('drivers', [DriversController::class, 'index']);
     Route::get('drivers/{id}', [DriversController::class, 'edit']);
-    Route::get('drivers/availableDays/{id}', [DriversController::class, 'availableDays']);
+    Route::get('drivers/availableDays', [DriversController::class, 'availableDays']);
     Route::post('drivers/availableDays', [DriversController::class, 'availableDaysStore']);
 
     Route::get('drivers/address/{id}', [DriversAddressController::class, 'edit']);
@@ -105,8 +105,8 @@ Route::group(['middleware'=>'auth:api'], function(){
     Route::get('zones/byClient/{id}', [ZonesController::class, 'byClient']);
     Route::post('zones/verify', [ZonesController::class, 'verifyIfExist']);
     Route::post('zones/configuring', [ZonesController::class, 'configuring']);
-    Route::get('zones/unsignedDrivers/{id}', [ZonesController::class, 'unsignedDriver']);
-    Route::post('zones/assign/driver', [ZonesController::class, 'assignDriver']);
+    Route::get('zones/unsignedDrivers', [ZonesController::class, 'unsignedDriver']);
+    Route::post('zones/assign/driver', [ZonesController::class, 'assignDriver']);    
 
     Route::get('warehouses/show/{id}', [WarehousesController::class, 'show']);
 
@@ -114,4 +114,5 @@ Route::group(['middleware'=>'auth:api'], function(){
     Route::get('services/unsigned/{id}', [ServicesController::class, 'totalUnsignedByClient']);
     Route::post('services', [ServicesController::class, 'store']);
     Route::delete('services/{id}', [ServicesController::class, 'delete']);
+    Route::post('services/assign', [ServicesController::class, 'assignToDriver']);
 });

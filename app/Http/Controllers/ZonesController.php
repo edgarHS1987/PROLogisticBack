@@ -12,7 +12,7 @@ use App\Models\ZonesZipCodes;
 use App\Models\ZonesDrivers;
 use App\Models\Driver;
 use App\Models\DriverAddress;
-
+use App\Models\DriversSchedule;
 
 class ZonesController extends Controller
 {
@@ -41,28 +41,34 @@ class ZonesController extends Controller
             }
 
             //obtener zip_code de driver
-            $drivers = DriverAddress::whereIn('drivers_id', $request)->select('zip_code')->get();
+            $today = date('Y-m-d');
+            $datetime = new \DateTime("now", new \DateTimeZone('America/Mexico_City'));
+            $time = $datetime->format('H:i');
 
-            $zonesIds = array();
+            if($time > '12:00'){
+                $operator = '>';
+            }else{
+                $operator = '>=';
+            }
+            $drivers = Driver::join('drivers_address', 'drivers_address.drivers_id', 'drivers.id')
+                            ->join('drivers_schedule', 'drivers_schedule.drivers_id', 'drivers.id')
+                            ->whereIn('drivers.id', $request)
+                            ->where('date', $operator, $today)
+                            ->select('drivers.id', 'drivers_address.zip_code', 'drivers_schedule.date')
+                            ->get();
+
             foreach($drivers as $driver){
                 $zone = ZipCodes::join('zones_zip_codes', 'zones_zip_codes.zip_codes_id', 'zip_codes.id')
                                 ->where('zip_codes.zip_code', $driver->zip_code)
                                 ->select('zones_zip_codes.zones_id')
                                 ->first();
-                
-                if(isset($zone)){
-                    array_push($zonesIds, $zone);
-                }
-            }
 
-            foreach($zonesIds as $zone){            
-                for($i = 0; $i < count($request->all()); $i++){
-                    $zoneDriver = new ZonesDrivers();
-                    $zoneDriver->zones_id = $zone->zones_id;
-                    $zoneDriver->drivers_id = $request[$i];
-                    $zoneDriver->date = date('Y-m-d');
-                    $zoneDriver->save();
-                }
+                $zoneDriver = new ZonesDrivers();
+                $zoneDriver->zones_id = $zone->zones_id;
+                $zoneDriver->drivers_id = $driver->id;
+                $zoneDriver->date = $driver->date;
+                $zoneDriver->save();
+
             }
 
             \DB::commit();
@@ -146,18 +152,31 @@ class ZonesController extends Controller
     /**
      * Obtiene el numero de driver que no estan asignados a una zona
      */
-    public function unsignedDriver($id){
-        $drivers = Driver::join('drivers_schedule', 'drivers_schedule.drivers_id', 'drivers.id')
-                        ->select('drivers.id')
-                        ->groupBy('drivers.id')->get();
+    public function unsignedDriver(){
+        $today = date('Y-m-d');
+        $datetime = new \DateTime("now", new \DateTimeZone('America/Mexico_City'));
+        $time = $datetime->format('H:i');
+
+        if($time > '12:00'){
+            $operator = '>';
+        }else{
+            $operator = '>=';
+        }
+
+        $drivers = DriversSchedule::select('drivers_id')
+                        ->where('date', $operator, $today)
+                        ->groupBy('drivers_id')
+                        ->get();
 
         $array = Array();       
                   
         foreach($drivers as $driver){
-            $driversZone = ZonesDrivers::where('drivers_id', $driver->id)->get();
+            $driversZone = ZonesDrivers::where('drivers_id', $driver->drivers_id)
+                                ->where('date', $operator, $today)
+                                ->get();
 
             if(count($driversZone) === 0){
-                array_push($array, $driver->id);
+                array_push($array, $driver->drivers_id);
             }
         }
 

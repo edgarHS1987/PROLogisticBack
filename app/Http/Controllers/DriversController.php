@@ -20,10 +20,17 @@ class DriversController extends Controller
         $allDrivers = Driver::select('id', 'names', 'lastname1', 'lastname2', 'rfc', 'photo', 'status')->get();
 
         $today = date('Y-m-d');
+        $datetime = new \DateTime("now", new \DateTimeZone('America/Mexico_City'));
+        $time = $datetime->format('H:i');
+
+        if($time > '12:00'){
+            $operator = '>';
+        }else{
+            $operator = '>=';
+        }
         foreach($allDrivers as $driver){
-        
             $availableDays = DriversSchedule::where('drivers_id', $driver->id)
-                                    ->where('date', '>', $today)
+                                    ->where('date', $operator, $today)
                                     ->select('id')->get();
 
             $driver['availableDays'] = count($availableDays);
@@ -189,9 +196,10 @@ class DriversController extends Controller
     /**
      * Obtiene el numero de dias disponibles de un driver
      */
-    public function availableDays($id){
+    public function availableDays(){
+        $user = $request->user()->id;
         $today = date('Y-m-d');
-        $driver = Driver::where('users_id', $id)->first();
+        $driver = Driver::where('users_id', $user)->first();
 
         $days =  DriversSchedule::where('drivers_id', $driver->id)
                         ->where('date', '>=', $today)->count();
@@ -206,7 +214,8 @@ class DriversController extends Controller
         try{
             \DB::beginTransaction();
 
-            $driver = Driver::where('users_id', $request->users_id)->select('id')->first();
+            $user = $request->user()->id;
+            $driver = Driver::where('users_id', $user)->select('id')->first();
 
             $dates = $request->dates;
 
