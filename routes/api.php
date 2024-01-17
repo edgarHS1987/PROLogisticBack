@@ -112,10 +112,15 @@ Route::group(['middleware'=>'auth:api'], function(){
 
     Route::get('warehouses/show/{id}', [WarehousesController::class, 'show']);
 
+    Route::post('services', [ServicesController::class, 'store']);
+    Route::post('services/assign', [ServicesController::class, 'assignToDriver']);
     Route::get('services/assigned', [ServicesController::class, 'assigned']);
+    Route::delete('services/delete/{id}', [ServicesController::class, 'delete']);
+    Route::get('services/details/{id}', [ServicesController::class, 'details']);
+    Route::get('services/list/{id}/{date}', [ServicesController::class, 'list']);
     Route::post('services/unsigned', [ServicesController::class, 'unsignedByClient']);
     Route::get('services/unsigned/{id}', [ServicesController::class, 'totalUnsignedByClient']);
-    Route::post('services', [ServicesController::class, 'store']);
-    Route::delete('services/delete/{id}', [ServicesController::class, 'delete']);
-    Route::post('services/assign', [ServicesController::class, 'assignToDriver']);
+    
+    
+    
 });

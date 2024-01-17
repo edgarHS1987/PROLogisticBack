@@ -45,6 +45,7 @@ return new class extends Migration
             $table->time('time');
             $table->string('status');
             $table->string('observations', 300)->nullable();
+            $table->string('finish_location')->nullable();
             $table->timestamps();
 
             $table->foreign('services_id')->references('id')->on('services')->onDelete('cascade');

@@ -15,6 +15,7 @@ use App\Models\Driver;
 
 class ServicesController extends Controller
 {
+    
 
     public function assignToDriver(Request $request){
         try{
@@ -138,6 +139,45 @@ class ServicesController extends Controller
             \DB::rollback();
             return response()->json(['error'=>'ERROR ('.$e->getCode().'): '.$e->getMessage().' '.$e->getLine()]);
         }
+    }
+
+    public function details($id){
+        $service = Services::where('id', $id)
+                        ->select(
+                            'id', 'date', 'guide_number', 'route_number', 'contact_name', 'confirmation',
+                            'address', 'zip_code', 'colony', 'state', 'municipality', 'phones'
+                        )->first();
+        
+        $service['details'] = ServicesDrivers::join('drivers', 'drivers.id', 'services_drivers.drivers_id')
+                                    ->where('services_drivers.services_id', $service->id)
+                                    ->select(
+                                        'services_drivers.id', 'services_drivers.date', 'services_drivers.time', 'services_drivers.status',
+                                        'services_drivers.observations', 'services_drivers.finish_location', 'drivers.names', 'drivers.lastname1', 'drivers.lastname2'
+                                    )->get();
+        
+        return response()->json($service);
+    }
+
+    public function list($id, $date){
+        $services = Services::where('clients_id', $id)
+                            ->where('date', $date)
+                            ->where('assigned', true)
+                            ->select(
+                                'id', 'date', 'contact_name', 'address', 'zip_code',
+                                'colony', 'municipality', 'phones', 'status', 'confirmation'
+                            )->get();
+
+        foreach($services as $service){
+            $driver = ServicesDrivers::join('drivers', 'drivers.id', 'services_drivers.drivers_id')
+                                ->where('services_drivers.services_id', $service->id)
+                                ->selectRaw('CONCAT(drivers.names," ",drivers.lastname1," ",drivers.lastname2) as name')
+                                ->first();
+            
+            $service['driver'] = $driver->name;
+        }
+
+        return response()->json($services);
+        
     }
 
     public function unsignedByClient(Request $request){
