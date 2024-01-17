@@ -34,5 +34,12 @@ class RoleSeeder extends Seeder
             'description'   =>  'Permite a un conductor utilizar los modulos de la aplicacion', //verificar si puede ingresar al sistema para que pueda agregar sus datos
             'guard_name'    =>  'api'
          ]);
+
+         $role = Role::create([
+            'name'          =>  'administrador_empresa',
+            'display_name'	=>	'Administrador de empresa',
+            'description'   =>  'Permite ver los modulos necesarios para la operacion de la empresa',
+            'guard_name'    =>  'api'
+         ]);
     }
 }

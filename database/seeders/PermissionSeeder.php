@@ -183,6 +183,12 @@ class PermissionSeeder extends Seeder
         ]);
 
         /** Servicios */
+        \DB::table('permissions')->insert([
+            'name'          => 'services_menu',
+            'display_name'  => 'Menú Servicios',
+            'description'   => 'Permite ver el menu de gestión de servicios, estados, zonas.',
+            'guard_name'	=> 'api'
+        ]);
         /** Estados */
         \DB::table('permissions')->insert([
             'name'          => 'services_states',
@@ -258,6 +264,12 @@ class PermissionSeeder extends Seeder
             'name'          => 'services_zones_delete',
             'display_name'  => 'Eliminar zonas',
             'description'   => 'Permite las zonas de un cliente.',
+            'guard_name'	=> 'api'
+        ]);
+        \DB::table('permissions')->insert([
+            'name'          => 'services_zones_assign_driver',
+            'display_name'  => 'Asigna driver a zonas',
+            'description'   => 'Permite asignar un driver a una zona.',
             'guard_name'	=> 'api'
         ]);
 

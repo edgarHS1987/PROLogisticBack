@@ -176,11 +176,7 @@ class ZonesController extends Controller
         $today = $datetime->format('Y-m-d');
         $time = $datetime->format('H:i');
 
-        if($time > '12:00'){
-            $operator = '>';
-        }else{
-            $operator = '>=';
-        }
+        $operator = '>=';        
 
         $drivers = DriversSchedule::select('drivers_id')
                         ->where('date', $operator, $today)
