@@ -102,11 +102,13 @@ Route::group(['middleware'=>'auth:api'], function(){
     Route::get('clients', [ClientsController::class, 'index']);
     Route::get('clients/list', [ClientsController::class, 'list']);
 
+    Route::post('zones/assign/driver', [ZonesController::class, 'assignDriver']);
     Route::get('zones/byClient/{id}', [ZonesController::class, 'byClient']);
-    Route::post('zones/verify', [ZonesController::class, 'verifyIfExist']);
+    Route::get('zones/configured/{id}', [ZonesController::class, 'configured']);
     Route::post('zones/configuring', [ZonesController::class, 'configuring']);
+    Route::get('zones/drivers/{id}', [ZonesController::class, 'zonesDrivers']);
     Route::get('zones/unsignedDrivers', [ZonesController::class, 'unsignedDriver']);
-    Route::post('zones/assign/driver', [ZonesController::class, 'assignDriver']);    
+    Route::post('zones/verify', [ZonesController::class, 'verifyIfExist']);
 
     Route::get('warehouses/show/{id}', [WarehousesController::class, 'show']);
 

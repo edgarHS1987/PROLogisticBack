@@ -20,7 +20,8 @@ class ServicesController extends Controller
         try{
             \DB::beginTransaction();
 
-            $today = date('Y-m-d');
+            $datetime = new \DateTime("now", new \DateTimeZone('America/Mexico_City'));
+            $today = $datetime->format('Y-m-d');
 
             //verifica drivers dsponibles
             $drivers = ZonesDrivers::where('date', $today)->select('drivers_id')->get();            
@@ -52,7 +53,7 @@ class ServicesController extends Controller
                 
                 //asigna id de driver
                 if(isset($driver)){
-                    $driverId = $driverId;
+                    $driverId = $driver->drivers_id;
                 }else{
                     //obtiene el driver mas cercano
                     $zipCode = ZipCodes::where('zip_code', $service->zip_code)->select('id')->first();
