@@ -46,6 +46,7 @@ return new class extends Migration
             $table->string('status');
             $table->string('observations', 300)->nullable();
             $table->string('finish_location')->nullable();
+            $table->boolean('isLast')->default(true);
             $table->timestamps();
 
             $table->foreign('services_id')->references('id')->on('services')->onDelete('cascade');

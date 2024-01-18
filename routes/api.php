@@ -118,6 +118,9 @@ Route::group(['middleware'=>'auth:api'], function(){
     Route::delete('services/delete/{id}', [ServicesController::class, 'delete']);
     Route::get('services/details/{id}', [ServicesController::class, 'details']);
     Route::get('services/list/{id}/{date}', [ServicesController::class, 'list']);
+    Route::post('services/start/charge', [ServicesController::class, 'startCharge']);
+    Route::post('services/end/charge', [ServicesController::class, 'endCharge']);
+    Route::post('services/start/deliver/{id}', [ServicesController::class, 'startDeliver']);
     Route::post('services/unsigned', [ServicesController::class, 'unsignedByClient']);
     Route::get('services/unsigned/{id}', [ServicesController::class, 'totalUnsignedByClient']);
     

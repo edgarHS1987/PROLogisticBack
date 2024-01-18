@@ -15,8 +15,30 @@ use App\Models\Driver;
 
 class ServicesController extends Controller
 {
-    
 
+    /**
+     * Servicios asignados a driver (app)
+     */
+    public function assigned(Request $request){
+        $users_id = $request->user()->id;
+        $driver = Driver::where('users_id', $users_id)->select('id')->first();
+        
+        $services = Services::join('services_drivers', 'services_drivers.services_id', 'services.id')                            
+                            ->where('services_drivers.drivers_id', $driver->id)
+                            ->where('services_drivers.isLast', true)
+                            ->select(
+                                'services.id', 'services.contact_name', 'services.address', 'services.colony',
+                                'services.zip_code', 'services.phones', 'services.municipality', "services.status", 
+                                'services.confirmation', 'services_drivers.status as status_service_driver'
+                            )
+                            ->get();
+
+        return response()->json($services);
+    }
+
+    /**
+     * Asignar servicios a driver
+     */
     public function assignToDriver(Request $request){
         try{
             \DB::beginTransaction();
@@ -36,9 +58,10 @@ class ServicesController extends Controller
             //asignar
             $clients_id = $request->clients_id;
 
-            $services = Services::where('clients_id', $clients_id)->select('id', 'zip_code', 'assigned')->get();
+            $services = Services::where('clients_id', $clients_id)->select('id', 'zip_code', 'assigned', 'status')->get();
 
             foreach($services as $service){
+                $status->status = 'En sitio';
                 $service->assigned = true;
                 $service->save();
 
@@ -122,6 +145,9 @@ class ServicesController extends Controller
         }
     }
 
+    /**
+     * Elimina servicio
+     */
     public function delete($id){
         try{
             \DB::beginTransaction();
@@ -141,6 +167,9 @@ class ServicesController extends Controller
         }
     }
 
+    /**
+     * Muestra detalles de servicio
+     */
     public function details($id){
         $service = Services::where('id', $id)
                         ->select(
@@ -158,6 +187,9 @@ class ServicesController extends Controller
         return response()->json($service);
     }
 
+    /**
+     * Carga listado de servicios por fecha
+     */
     public function list($id, $date){
         $services = Services::where('clients_id', $id)
                             ->where('date', $date)
@@ -180,48 +212,132 @@ class ServicesController extends Controller
         
     }
 
-    public function unsignedByClient(Request $request){
-        $services = Services::where('clients_id', $request->clients_id)
-                            ->where('assigned', false)
-                            ->get();
+    /**
+     * Iniciar carga de servicios (app)
+     */
+    public function startCharge(Request $request){
+        try{
+            \DB::beginTransaction();
 
-        foreach($services as $service){
-            $client = Clients::where('id', $service->clients_id)->select('name')->first();
-            $service->client = $client->name;
+            $servicesIds = $request->all();
+            $services = ServicesDrivers::whereIn('services_id', $servicesIds)->get();
 
-            $warehouse = Warehouses::where('id', $service->warehouses_id)->select('name')->first();
-            $service->warehouse = $warehouse->name;
+            foreach($services as $service){
+                $service->isLast = false;
+                $service->save();
+
+                $serviceItem = Services::where('id', $service->services_id)->select('id', 'status')->first();
+                $serviceItem->status = 'Cargando';
+                $serviceItem->save();
+
+                $datetime = new \DateTime("now", new \DateTimeZone('America/Mexico_City'));
+                $today = $datetime->format('Y-m-d');
+                $time = $datetime->format('H:i');
+                
+                $serviceDriver = new ServicesDrivers();
+                $serviceDriver->services_id = $service->services_id;
+                $serviceDriver->drivers_id = $service->drivers_id;
+                $serviceDriver->date = $today;
+                $serviceDriver->time = $time;
+                $serviceDriver->status = 'Cargando';
+                $serviceDriver->save();  
+            }
+
+            \DB::commit();
+
+            return response()->json([
+                'message'=>'Iniciando carga'
+            ]);
+        }catch(\Exception $e){
+            \DB::rollback();
+            return response()->json(['error'=>'ERROR ('.$e->getCode().'): '.$e->getMessage().' '.$e->getLine()]);
         }
-
-        return response()->json($services);
     }
 
     /**
-     * Servicios asignados a driver
+     * finalizar carga de servicios (app)
      */
-    public function assigned(Request $request){
-        $users_id = $request->user()->id;
-        $driver = Driver::where('users_id', $users_id)->select('id')->first();
-        
-        $services = Services::join('services_drivers', 'services_drivers.services_id', 'services.id')                            
-                            ->where('services_drivers.drivers_id', $driver->id)
-                            ->select(
-                                'services.id', 'services.contact_name', 'services.address', 'services.colony',
-                                'services.zip_code', 'services.phones', 'services.municipality'
-                            )
-                            ->get();
+    public function endCharge(Request $request){
+        try{
+            \DB::beginTransaction();
 
-        return response()->json($services);
+            $servicesIds = $request->all();
+            $services = ServicesDrivers::whereIn('services_id', $servicesIds)->where('isLast', true)->get();
+
+            foreach($services as $service){
+                $service->isLast = false;
+                $service->save();
+
+                $serviceItem = Services::where('id', $service->services_id)->select('id', 'status')->first();
+                $serviceItem->status = 'Listo para entrega';
+                $serviceItem->save();
+
+                $datetime = new \DateTime("now", new \DateTimeZone('America/Mexico_City'));
+                $today = $datetime->format('Y-m-d');
+                $time = $datetime->format('H:i');
+                
+                $serviceDriver = new ServicesDrivers();
+                $serviceDriver->services_id = $service->services_id;
+                $serviceDriver->drivers_id = $service->drivers_id;
+                $serviceDriver->date = $today;
+                $serviceDriver->time = $time;
+                $serviceDriver->status = 'Listo para entrega';
+                $serviceDriver->save();  
+            }
+
+            \DB::commit();
+
+            return response()->json([
+                'message'=>'Carga finalizada'
+            ]);
+        }catch(\Exception $e){
+            \DB::rollback();
+            return response()->json(['error'=>'ERROR ('.$e->getCode().'): '.$e->getMessage().' '.$e->getLine()]);
+        }
     }
 
-    public function totalUnsignedByClient($id){
-        $services = Services::where('clients_id', $id)->where('assigned', false)->get();
+    /**
+     * iniciar entrega (app)
+     */
+    public function startDeliver($id){
+        try{
+            \DB::beginTransaction();
 
-        return response()->json([
-            'services'=>count($services)
-        ]);
-    }
+            $service = Services::where('id', $id)->first();
+            $service->status = 'En ruta';
+            $service->save();
 
+            $service = ServicesDrivers::where('services_id', $id)->where('isLast', true)->first();
+            $service->isLast = false;
+            $service->save();
+
+            $datetime = new \DateTime("now", new \DateTimeZone('America/Mexico_City'));
+            $today = $datetime->format('Y-m-d');
+            $time = $datetime->format('H:i');
+
+            $serviceDriver = new ServicesDrivers();
+            $serviceDriver->services_id = $service->services_id;
+            $serviceDriver->drivers_id = $service->drivers_id;
+            $serviceDriver->date = $today;
+            $serviceDriver->time = $time;
+            $serviceDriver->status = 'En ruta';
+            $serviceDriver->save(); 
+
+            \DB::commit();
+
+            return response()->json([
+                'message'=>'Inicia ruta'
+            ]);
+
+        }catch(\Exception $e){
+            \DB::rollback();
+            return response()->json(['error'=>'ERROR ('.$e->getCode().'): '.$e->getMessage().' '.$e->getLine()]);
+        }
+    } 
+
+    /**
+     * Guarda servicio
+     */
     public function store(Request $request){
         try{
             \DB::beginTransaction();
@@ -269,4 +385,29 @@ class ServicesController extends Controller
             return response()->json(['error'=>'ERROR ('.$e->getCode().'): '.$e->getMessage().' '.$e->getLine()]);
         }
     }
+
+    public function totalUnsignedByClient($id){
+        $services = Services::where('clients_id', $id)->where('assigned', false)->get();
+
+        return response()->json([
+            'services'=>count($services)
+        ]);
+    }
+
+    public function unsignedByClient(Request $request){
+        $services = Services::where('clients_id', $request->clients_id)
+                            ->where('assigned', false)
+                            ->get();
+
+        foreach($services as $service){
+            $client = Clients::where('id', $service->clients_id)->select('name')->first();
+            $service->client = $client->name;
+
+            $warehouse = Warehouses::where('id', $service->warehouses_id)->select('name')->first();
+            $service->warehouse = $warehouse->name;
+        }
+
+        return response()->json($services);
+    }
+    
 }
