@@ -121,6 +121,7 @@ Route::group(['middleware'=>'auth:api'], function(){
     Route::post('services/start/charge', [ServicesController::class, 'startCharge']);
     Route::post('services/end/charge', [ServicesController::class, 'endCharge']);
     Route::post('services/start/deliver/{id}', [ServicesController::class, 'startDeliver']);
+    Route::get('services/show/{id}', [ServicesController::class, 'show']);
     Route::post('services/unsigned', [ServicesController::class, 'unsignedByClient']);
     Route::get('services/unsigned/{id}', [ServicesController::class, 'totalUnsignedByClient']);
     

@@ -336,6 +336,21 @@ class ServicesController extends Controller
     } 
 
     /**
+     * Obtiene datos de un servicio
+     */
+    public function show($id){
+        $service = Services::where('id', $id)
+                        ->select(
+                            'id', 'date', 'time', 'guide_number', 'route_number', 'confirmation',
+                            'contact_name', 'address', 'zip_code', 'colony', 'state', 'municipality',
+                            'phones'
+                        )
+                        ->first();
+
+        return response()->json($service);
+    }
+
+    /**
      * Guarda servicio
      */
     public function store(Request $request){
