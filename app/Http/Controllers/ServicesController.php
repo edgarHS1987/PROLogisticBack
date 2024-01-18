@@ -61,7 +61,7 @@ class ServicesController extends Controller
             $services = Services::where('clients_id', $clients_id)->select('id', 'zip_code', 'assigned', 'status')->get();
 
             foreach($services as $service){
-                $status->status = 'En sitio';
+                $service->status = 'En sitio';
                 $service->assigned = true;
                 $service->save();
 
