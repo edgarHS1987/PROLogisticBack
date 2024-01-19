@@ -27,6 +27,7 @@ class ServicesController extends Controller
         $services = Services::join('services_drivers', 'services_drivers.services_id', 'services.id')                            
                             ->where('services_drivers.drivers_id', $driver->id)
                             ->where('services_drivers.isLast', true)
+                            ->where('status', '!=', 'Finalizado')
                             ->select(
                                 'services.id', 'services.contact_name', 'services.address', 'services.colony',
                                 'services.zip_code', 'services.phones', 'services.municipality', "services.status", 
@@ -395,7 +396,7 @@ class ServicesController extends Controller
                         ->select(
                             'id', 'date', 'time', 'guide_number', 'route_number', 'confirmation',
                             'contact_name', 'address', 'zip_code', 'colony', 'state', 'municipality',
-                            'phones'
+                            'phones', 'latitude', 'longitude', 'full_address'
                         )
                         ->first();
 
