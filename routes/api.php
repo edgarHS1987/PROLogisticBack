@@ -124,6 +124,8 @@ Route::group(['middleware'=>'auth:api'], function(){
     Route::get('services/show/{id}', [ServicesController::class, 'show']);
     Route::post('services/unsigned', [ServicesController::class, 'unsignedByClient']);
     Route::get('services/unsigned/{id}', [ServicesController::class, 'totalUnsignedByClient']);
+    Route::get('services/location/{id}', [ServicesController::class, 'location']);
+    Route::put('services/update/location', [ServicesController::class, 'locationUpdate']);
     
     
     

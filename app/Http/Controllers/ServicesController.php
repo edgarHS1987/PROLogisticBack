@@ -12,6 +12,7 @@ use App\Models\ZonesDrivers;
 use App\Models\ServicesDrivers;
 use App\Models\DriverAddress;
 use App\Models\Driver;
+use App\Models\UsePlatform;
 
 class ServicesController extends Controller
 {
@@ -213,6 +214,57 @@ class ServicesController extends Controller
     }
 
     /**
+     * Obtiene listado de servicios que no cuentan con latitud y longitud
+     */
+    public function location($id){
+        $services = Services::where('clients_id', $id)
+                        ->where('latitude', NULL)
+                        ->where('longitude', NULL)
+                        ->select(
+                            'id', 'address', 'zip_code', 'state'
+                        )
+                        ->get();
+
+        $platforms = UsePlatform::select('id', 'platform', 'total')->get();
+
+        return response()->json([
+            'services'=>$services,
+            'platforms'=>$platforms
+        ]);
+    }
+
+    /**
+     * Actualiza latitud y longitud
+     */
+    public function locationUpdate(Request $request){
+        try{
+            \DB::beginTransaction();
+
+            $services = $request->services;
+
+            foreach($services as $s){
+                $service = Services::where('id', $s['id'])->first();
+                $service->latitude = $s['latitude'];
+                $service->longitude = $s['longitude'];
+                $service->full_address = $s['full_address'];
+                $service->save();
+            }
+
+            $platform = UsePlatform::where('platform', $request->platform)->first();
+            $platform->total += count($services);
+            $platform->save();
+
+            \DB::commit();
+
+            return response()->json(['ok'=>true]);
+
+        }catch(\Exception $e){
+            \DB::rollback();
+            return response()->json(['error'=>'ERROR ('.$e->getCode().'): '.$e->getMessage().' '.$e->getLine()]);
+        }
+    }
+
+    /**
      * Iniciar carga de servicios (app)
      */
     public function startCharge(Request $request){
@@ -336,7 +388,7 @@ class ServicesController extends Controller
     } 
 
     /**
-     * Obtiene datos de un servicio
+     * Obtiene datos de un servicio (app)
      */
     public function show($id){
         $service = Services::where('id', $id)
