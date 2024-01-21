@@ -60,7 +60,7 @@ class UserSeeder extends Seeder
 
         $clients = Clients::all();
         foreach($clients as $client){
-            $clientUSer = ClientsUSers::create([
+            ClientsUSers::create([
                 'clients_id'=>$client->id,
                 'users_id'=>$user->id
             ]);
@@ -108,7 +108,7 @@ class UserSeeder extends Seeder
 
         $clients = Clients::all();
         foreach($clients as $client){
-            $clientUSer = ClientsUSers::create([
+            ClientsUSers::create([
                 'clients_id'=>$client->id,
                 'users_id'=>$user->id
             ]);
