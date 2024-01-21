@@ -19,6 +19,7 @@ return new class extends Migration
         });
 
         Schema::create('clients_warehouses', function(Blueprint $table){
+            $table->id();
             $table->bigInteger('clients_id')->unsigned()->index();
             $table->bigInteger('warehouses_id')->unsigned()->index();
 
@@ -27,6 +28,7 @@ return new class extends Migration
         });
 
         Schema::create('clients_users', function(Blueprint $table){
+            $table->id();
             $table->bigInteger('clients_id')->unsigned()->index();
             $table->bigInteger('users_id')->unsigned()->index();
 
