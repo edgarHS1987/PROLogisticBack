@@ -115,6 +115,7 @@ Route::group(['middleware'=>'auth:api'], function(){
     Route::post('zones/verify', [ZonesController::class, 'verifyIfExist']);
 
     Route::get('warehouses/show/{id}', [WarehousesController::class, 'show']);
+    Route::get('warehouses/test/{id}', [WarehousesController::class, 'test']);
 
     Route::post('services', [ServicesController::class, 'store']);
     Route::post('services/assign', [ServicesController::class, 'assignToDriver']);
