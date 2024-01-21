@@ -13,7 +13,7 @@ class WarehousesController extends Controller
         try {
             $warehouses = Clients::join('clients_warehouses', 'clients_warehouses.clients_id', 'clients.id')
                         ->join('warehouses', 'warehouses.id', 'clients_warehouses.warehouses_id')
-                        ->select('warehouses.id as value', \DB::raw('CONCAT(warehouses.name, " - ", clients.name) as label'))
+                        ->select('warehouses.id as value ,warehouses.name as label')
                         ->where('clients.id', $id)
                         ->get();
         } catch (\Exception $e) {
