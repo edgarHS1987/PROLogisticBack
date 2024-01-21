@@ -34,7 +34,7 @@ class UserSeeder extends Seeder
 
         $permisos = Permission::all();
         foreach ($permisos as $permiso) {
-        	//asigna permiso a usuario
+        	
             $user->givePermissionTo($permiso->name);
             //$rol->givePermissionTo($permission);
      	}
