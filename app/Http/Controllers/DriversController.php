@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 use App\Models\Driver;
 use App\Models\User;
+use App\Models\DriversSchedule;
+use App\Models\Zones;
+
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -15,26 +18,36 @@ class DriversController extends Controller
      */
     public function index()
     {   
-        // try{
-        //     \DB::beginTransaction();
+        $allDrivers = Driver::select('id', 'names', 'lastname1', 'lastname2', 'rfc', 'photo', 'status')->get();
 
+        $today = date('Y-m-d');
+        $datetime = new \DateTime("now", new \DateTimeZone('America/Mexico_City'));
+        $time = $datetime->format('H:i');
 
+        if($time > '12:00'){
+            $operator = '>';
+        }else{
+            $operator = '>=';
+        }
+        foreach($allDrivers as $driver){
+            $availableDays = DriversSchedule::where('drivers_id', $driver->id)
+                                    ->where('date', $operator, $today)
+                                    ->select('id')->get();
+            
+            $zone = Zones::join('zones_drivers', 'zones_drivers.zones_id', 'zones.id')
+                        ->where('zones_drivers.drivers_id', $driver->id)
+                        ->select('zones.name')
+                        ->first();
 
-        //     \DB::commit();
+            if(isset($zone)){
+                $driver['zone'] = $zone->name;
+            }else{
+                $driver['zone'] = 'Si zona';
+            }
 
-        //     return response()->json([
-        //         'ok' => 'registro correcto',                
-        //         'sales_id' => $sales->id
-        //     ]);
+            $driver['availableDays'] = count($availableDays);
+        }
 
-
-        // }catch(\Exception $e){
-        //     \DB::rollback();
-        //     //dd($e);
-        //     return response()->json(['error'=>'ERROR ('.$e->getCode().'): '.$e->getMessage().' '.$e->getLine()]);
-        // }
-
-        $allDrivers = Driver::all();
         try {
             $statusCode = 200;
             return response()->json([
@@ -158,14 +171,6 @@ class DriversController extends Controller
 
 
     /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-
-    }
-
-    /**
      * Update the specified resource in storage.
      */
     public function update(Request $request, string $id)
@@ -200,13 +205,51 @@ class DriversController extends Controller
         Driver::where('id', $id)->update(['rfc' => $RFC]);
     }
 
+    /**
+     * Obtiene el numero de dias disponibles de un driver
+     */
+    public function availableDays(Request $request){        
+        $user = $request->user()->id;
+        $today = date('Y-m-d');
+        $driver = Driver::where('users_id', $user)->first();
 
+        $days =  DriversSchedule::where('drivers_id', $driver->id)
+                        ->where('date', '>=', $today)->count();
+        
+        return response()->json([
+            'days'=>$days
+        ]);
+    }
 
     /**
-     * Remove the specified resource from storage.
+     * Guarda los dias disponibles
      */
-    public function destroy(string $id)
-    {
-        //
+    public function availableDaysStore(Request $request){
+        try{
+            \DB::beginTransaction();
+
+            $user = $request->user()->id;
+            $driver = Driver::where('users_id', $user)->select('id')->first();
+
+            $dates = $request->dates;
+
+            foreach($dates as $date){
+                $schedule = new DriversSchedule();
+                $schedule->drivers_id = $driver->id;
+                $schedule->date = $date;
+                $schedule->save();
+            }
+
+            \DB::commit();
+
+            return response()->json([
+                'message'=>'Se registro la disponibilidad correctamente'
+            ]);
+        }catch(Exception $e){
+            return response()->json([
+                'error'=>'ERROR ('.$e->getCode().'): '.$e->getMessage(),
+                'message'=>'Error al registrar disponibilidad'
+            ]);
+        }
     }
 }

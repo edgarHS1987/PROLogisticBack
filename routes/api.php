@@ -53,6 +53,8 @@ Route::group(['middleware'=>'auth:api'], function(){
     Route::post('drivers/create', [DriversController::class, 'store']);
     Route::get('drivers', [DriversController::class, 'index']);
     Route::get('drivers/{id}', [DriversController::class, 'edit']);
+    Route::get('drivers/available/days', [DriversController::class, 'availableDays']);
+    Route::post('drivers/available/days', [DriversController::class, 'availableDaysStore']);
 
     Route::get('drivers/address/{id}', [DriversAddressController::class, 'edit']);
     Route::post('drivers/address/create', [DriversAddressController::class, 'store']);
@@ -104,13 +106,31 @@ Route::group(['middleware'=>'auth:api'], function(){
     Route::get('clients', [ClientsController::class, 'index']);
     Route::get('clients/list', [ClientsController::class, 'list']);
 
+    Route::post('zones/assign/driver', [ZonesController::class, 'assignDriver']);
     Route::get('zones/byClient/{id}', [ZonesController::class, 'byClient']);
-    Route::post('zones/verify', [ZonesController::class, 'verifyIfExist']);
+    Route::get('zones/configured/{id}', [ZonesController::class, 'configured']);
     Route::post('zones/configuring', [ZonesController::class, 'configuring']);
+    Route::get('zones/drivers/{id}', [ZonesController::class, 'zonesDrivers']);
+    Route::get('zones/unsignedDrivers', [ZonesController::class, 'unsignedDriver']);
+    Route::post('zones/verify', [ZonesController::class, 'verifyIfExist']);
 
     Route::get('warehouses/show/{id}', [WarehousesController::class, 'show']);
 
-    Route::post('services/list', [ServicesController::class, 'list']);
     Route::post('services', [ServicesController::class, 'store']);
-    Route::delete('services/{id}', [ServicesController::class, 'delete']);
+    Route::post('services/assign', [ServicesController::class, 'assignToDriver']);
+    Route::get('services/assigned', [ServicesController::class, 'assigned']);
+    Route::delete('services/delete/{id}', [ServicesController::class, 'delete']);
+    Route::get('services/details/{id}', [ServicesController::class, 'details']);
+    Route::get('services/list/{id}/{date}', [ServicesController::class, 'list']);
+    Route::post('services/start/charge', [ServicesController::class, 'startCharge']);
+    Route::post('services/end/charge', [ServicesController::class, 'endCharge']);
+    Route::post('services/start/deliver/{id}', [ServicesController::class, 'startDeliver']);
+    Route::get('services/show/{id}', [ServicesController::class, 'show']);
+    Route::post('services/unsigned', [ServicesController::class, 'unsignedByClient']);
+    Route::get('services/unsigned/{id}', [ServicesController::class, 'totalUnsignedByClient']);
+    Route::get('services/location/{id}', [ServicesController::class, 'location']);
+    Route::put('services/update/location', [ServicesController::class, 'locationUpdate']);
+    
+    
+    
 });

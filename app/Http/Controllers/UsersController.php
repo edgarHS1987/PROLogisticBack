@@ -19,16 +19,35 @@ class UsersController extends Controller
     public function index(){
         $logged_id = auth()->user()->id;
         
+        $admin = User::where('id', $logged_id)->select('role')->first();
+        $all = true;
+        if($admin->role !== 'administrador_de_sistema'){
+            $all = false;
+        }
+
         $users = User::join('roles', 'roles.name', 'users.role')
                     ->where('users.id', '!=', $logged_id)
-                    ->where('active', 1)
-                    ->selectRaw(
-                        'users.names, users.lastname1, users.lastname2, 
-                        users.email, 
-                        roles.display_name as role, 
-                        users.id'
-                    )
-                    ->get();
+                    ->where('active', 1);
+        
+        if($all){
+            $users =  $users->selectRaw(
+                            'users.names, users.lastname1, users.lastname2, 
+                            users.email, 
+                            roles.display_name as role, 
+                            users.id'
+                        )
+                        ->get();
+        }else{
+            $users = $users->where('role', '!=', 'administrador_de_sistema')
+                        ->selectRaw(
+                            'users.names, users.lastname1, users.lastname2, 
+                            users.email, 
+                            roles.display_name as role, 
+                            users.id'
+                        )
+                        ->get();
+        }
+                    
         
         return response()->json($users);
     }
@@ -80,8 +99,6 @@ class UsersController extends Controller
         try{
             \DB::beginTransaction();
             $user = User::where('id', $id)->first();
-            $user->fill($request->all());
-            $user->save();
 
             //remover permisos y role
             $role = Role::select('id')->where('name', $user->role)->first();
@@ -91,6 +108,9 @@ class UsersController extends Controller
             });
 
             $user->removeRole($user->role);
+            $user->fill($request->all());
+            $user->save();
+            
 
             //Reasignar permisos y rol
             $user->assignRole($request->role);

@@ -31,6 +31,7 @@ return new class extends Migration
             $table->boolean('assigned')->default(false);
             $table->string('latitude', 100)->nullable();
             $table->string('longitude', 100)->nullable();
+            $table->string('full_address')->nullable();
             $table->timestamps();
 
             $table->foreign('warehouses_id')->references('id')->on('warehouses');
@@ -45,6 +46,8 @@ return new class extends Migration
             $table->time('time');
             $table->string('status');
             $table->string('observations', 300)->nullable();
+            $table->string('finish_location')->nullable();
+            $table->boolean('isLast')->default(true);
             $table->timestamps();
 
             $table->foreign('services_id')->references('id')->on('services')->onDelete('cascade');

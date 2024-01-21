@@ -8,6 +8,10 @@ use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
 use App\Models\User;
 use App\Models\Sites;
+use App\Models\Driver;
+use App\Models\DriverAddress;
+use App\Models\Clients;
+use App\Models\ClientsUsers;
 
 class UserSeeder extends Seeder
 {
@@ -35,6 +39,33 @@ class UserSeeder extends Seeder
             //$rol->givePermissionTo($permission);
      	}
 
+        $driver = Driver::create([
+            'users_id'=>$user->id,
+            'names'=>'Rogelio',
+            'lastname1'=>'Gamez',
+            'lastname2'=>'',
+            'status'=>'Activo'
+        ]);
+
+        $driverAddress = DriverAddress::create([
+            'drivers_id'=>$driver->id,
+            'street'=>'Carlos Tovar',
+            'ext_number'=>'311',
+            'colony'=>'Centro',
+            'state'=>'San Luis Potosí',
+            'municipality'=>'San Luis Potosí',
+            'zip_code'=>'78000',
+            'isFiscal'=>true
+        ]);
+
+        $clients = Clients::all();
+        foreach($clients as $client){
+            $clientUSer = ClientsUSers::create([
+                'clients_id'=>$client->id,
+                'users_id'=>$user->id
+            ]);
+        }
+
      	//asigna rol a usuario
         $user->assignRole('administrador_de_sistema');
 
@@ -56,7 +87,35 @@ class UserSeeder extends Seeder
             //$rol->givePermissionTo($permission);
      	}
 
+         $driver = Driver::create([
+            'users_id'=>$user->id,
+            'names'=>'Edgar',
+            'lastname1'=>'Mendoza',
+            'lastname2'=>'',
+            'status'=>'Activo'
+        ]);
+
+        $driverAddress = DriverAddress::create([
+            'drivers_id'=>$driver->id,
+            'street'=>'Paseo de la Estepa',
+            'ext_number'=>'221',
+            'colony'=>'Puerta Natura',
+            'state'=>'San Luis Potosí',
+            'municipality'=>'San Luis Potosí',
+            'zip_code'=>'78397',
+            'isFiscal'=>true
+        ]);
+
+        $clients = Clients::all();
+        foreach($clients as $client){
+            $clientUSer = ClientsUSers::create([
+                'clients_id'=>$client->id,
+                'users_id'=>$user->id
+            ]);
+        }
+
      	//asigna rol a usuario
         $user->assignRole('administrador_de_sistema');
+        
     }
 }
